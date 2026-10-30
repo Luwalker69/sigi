@@ -1,0 +1,4 @@
+*
+!sigi/
+!sigi/*.py
+!Dockerfile.worker

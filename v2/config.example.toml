@@ -1,0 +1,12 @@
+# Aucun secret ici. Tarifs standard consultés le 30/10/2026 ; revérifier avant usage.
+[model]
+endpoint = "https://generativelanguage.googleapis.com/v1beta/openai"
+name = "gemini-3.5-flash-lite"
+key_env = "GEMINI_API_KEY"
+input_usd_per_million = "0.30"
+output_usd_per_million = "2.50"
+
+[limits]
+budget_usd = "0.05"
+max_turns = 8
+max_output_tokens = 1024
