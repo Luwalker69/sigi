@@ -1,6 +1,6 @@
 [project]
 name = "sigi-modular"
-version = "0.2.0a1"
+version = "0.2.0a2"
 description = "SIGI : modèle, outils et journal remplaçables"
 requires-python = ">=3.11"
 license = "MIT"

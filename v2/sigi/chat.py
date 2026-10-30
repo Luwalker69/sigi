@@ -66,7 +66,8 @@ class ChatSession:
                 "budget_overrun": "Coût déclaré supérieur au budget : la conversation est arrêtée.",
                 "turns_exhausted": "Limite d'étapes atteinte ; les actions déjà réalisées sont dans le journal.",
             }.get(run["status"], "La demande n'a pas abouti.")
-        self.visible.append({"role": "assistant", "content": response, "status": run["status"]})
+        actions = [{"name": event["name"], "status": event["status"]} for event in run["events"] if event["type"] == "tool"]
+        self.visible.append({"role": "assistant", "content": response, "status": run["status"], "actions": actions})
         record = self.public_state()
         # Conserver le contexte complet pour inspection ; la clé n'en fait jamais partie.
         record["history"] = self.history

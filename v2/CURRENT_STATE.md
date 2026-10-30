@@ -14,13 +14,17 @@ Assistant aussi polyvalent que possible : automatisations natives, recherche app
 - Un appel API compatible Chat Completions a été vérifié contre un serveur simulé, y compris la remontée du coût et l'absence de clé dans le journal.
 - Les limites de budget, chemins hors workspace, liens symboliques et écrasements sont testés.
 - Les redirections HTTP ne transmettent pas les identifiants.
-- Vingt et un tests sur vingt et un passent sous Ubuntu, dont les diagnostics, le contexte de conversation, le budget cumulé et les frontières HTTP locales. Le correctif de diagnostic et l'interface n'ont pas encore été testés sous Windows natif.
+- Vingt-huit tests sur vingt-huit passent sous Ubuntu : diagnostics, conversation, budget, frontières HTTP, inspection du code et propositions séparées. Les ajouts récents n'ont pas été testés sous Windows natif.
 - La CLI `python3 -B -m sigi demo` a été exécutée dans Ubuntu et a produit un rapport réel.
 - `doctor --ask-key` vérifie l'authentification et la liste des modèles sans génération. Son transport est vérifié avec une API simulée.
 - `run --ask-key` demande directement la clé, sans `read` ni `export`, et remplace une valeur de terminal obsolète pour cette seule commande.
 - Le propriétaire a confirmé un premier appel Gemini réussi : présentation de SIGI, statut `completed`, coût déclaré 0,0001928 USD. Cette observation valide un échange simple ; elle ne mesure pas la qualité générale du modèle.
 - `python3 -B -m sigi ui` lance une interface locale sur http://127.0.0.1:8765 : clé masquée en mémoire, conversation suivie, coût cumulé, nouvelle conversation et déconnexion.
 - Le parcours de chat en mode démo a été exercé dans un navigateur, sur une vue étroite et une vue d'ordinateur ; la connexion et la déconnexion sont également testées via une API simulée.
+- Version `0.2.0a2` : le chat et la CLI utilisent un registre commun de neuf outils, avec une identité technique actualisée à chaque demande.
+- L'agent peut lire, rechercher et parcourir ses propres sources et documents. Les clés et données de session sont exclues de ce périmètre.
+- Il peut analyser la syntaxe et préparer une proposition de modification (diff, nouveau contenu, empreinte de départ) dans `essai/proposals/`. La source active n'est pas modifiée.
+- Les actions d'outils sont affichées sous les réponses du chat. Le parcours « inventaire → lecture du code → proposition séparée » a été validé avec un modèle de test, sans appel payant.
 
 ## Incident résolu et limites connues
 
@@ -31,6 +35,8 @@ Le correctif préserve les codes HTTP et quelques raisons connues sans afficher 
 ## Ce qui n'est pas encore fait
 
 - Conversation multi-tour et actions fichiers de l'interface à confirmer avec le vrai modèle ; tests automatiques faits avec un modèle simulé.
+- Inspection de ses sources par Gemini et qualité des propositions à confirmer dans l'interface avec le propriétaire.
+- Application des propositions, tests exécutés dans une sandbox et promotion de nouvelles versions de l'agent.
 - Hébergement distant, terminaison TLS, confinement OS et exécution de code généré.
 - Navigation, moteur de recherche, documents et comptes connectés.
 - Automatisations programmées, reprise automatique après crash et budgets multi-workers.
@@ -46,7 +52,7 @@ Le chat conserve les réservations incertaines dans son budget pour ne pas les e
 
 ## Prochaine étape unique
 
-Utiliser l'interface sur deux ou trois échanges réels, puis demander de lire un brief et de créer une synthèse. Vérifier le fichier et rapprocher le coût cumulé de celui du fournisseur. Le paiement des crédits reste réalisé par le propriétaire dans Google AI Studio.
+Redémarrer l'interface après mise à jour et demander à SIGI de lire son propre code, de citer les fichiers qui prouvent ses capacités, puis de préparer une petite proposition d'amélioration. Vérifier la trace des outils et le fichier sous `essai/proposals/`. L'application de propositions et les tests en sandbox constituent le prochain parcours à construire.
 
 ## Puis
 

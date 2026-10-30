@@ -8,7 +8,7 @@ function notice(text = '') { $('notice').textContent = text; $('notice').hidden 
 function money(value) { return Number(value || 0).toLocaleString('fr-FR', {minimumFractionDigits: 6, maximumFractionDigits: 6}) + ' $'; }
 function render() {
   if (!state) return;
-  $('connection-label').textContent = state.connected ? (state.demo ? 'Démo sans IA' : 'Gemini connecté') : 'À connecter';
+  $('connection-label').textContent = state.connected ? (state.demo ? 'Démo sans IA' : 'SIGI connecté') : 'À connecter';
   $('connection-dot').classList.toggle('connected', state.connected);
   $('disconnect').hidden = !state.connected || state.demo;
   $('connect-form').hidden = state.connected;
@@ -19,7 +19,8 @@ function render() {
   $('new-chat-mobile').disabled = !state.connected || busy;
   $('disconnect').disabled = busy;
   $('connect-button').disabled = busy;
-  $('model-label').textContent = state.connected ? state.model : 'Connecte ta clé pour commencer';
+  $('model-label').textContent = state.connected ? state.model + ' · ' + (state.agent?.tools?.length || 3) + ' outils' : 'Connecte ta clé pour commencer';
+  $('agent-note').textContent = state.agent?.project_root ? 'Code source et documentation accessibles. Les améliorations sont préparées sous forme de propositions.' : 'Sources indisponibles ici. Les outils du dossier de travail restent accessibles.';
   $('cost').textContent = money(state.spent_usd);
   $('mobile-cost').textContent = 'Coût : ' + money(state.spent_usd);
   $('budget-label').textContent = 'Budget SIGI : ' + Number(state.budget_usd).toLocaleString('fr-FR') + ' $';
@@ -40,6 +41,14 @@ function render() {
         const badge = document.createElement('span'); badge.className = 'error-badge'; badge.textContent = 'Demande interrompue'; label.append(badge);
       }
       article.append(label);
+      if (message.actions?.length) {
+        const actions = document.createElement('div'); actions.className = 'tool-actions';
+        const labels = {agent_info:'Inventaire de l’agent', project_tree:'Exploration du projet', project_read:'Lecture du code', project_search:'Recherche dans le code', project_check_syntax:'Analyse de syntaxe', project_propose_change:'Proposition de modification', list_files:'Liste des fichiers', read_file:'Lecture d’un fichier', write_file:'Création d’un fichier'};
+        for (const action of message.actions) {
+          const item = document.createElement('span'); item.textContent = (action.status === 'succeeded' ? '✓ ' : '⚠ ') + (labels[action.name] || action.name); actions.append(item);
+        }
+        article.append(actions);
+      }
     }
     const text = document.createElement('div'); text.className = 'text'; text.textContent = message.content;
     article.append(text); $('messages').append(article);

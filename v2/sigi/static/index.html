@@ -14,7 +14,7 @@
     <button id="new-chat" class="new-chat" type="button" disabled><span aria-hidden="true">＋</span> Nouvelle conversation</button>
     <div class="nav-label">TON ESPACE</div>
     <div class="active-nav"><span aria-hidden="true">◌</span> Conversation</div>
-    <div class="sidebar-note"><span class="note-icon" aria-hidden="true">↗</span><p>Une idée, un texte,<br>un petit coup de main.</p><small>SIGI peut aussi lire et créer<br>des fichiers dans le dossier essai.</small></div>
+    <div class="sidebar-note"><span class="note-icon" aria-hidden="true">↗</span><p>Un agent,<br>un projet qui évolue.</p><small id="agent-note">SIGI peut explorer ses sources et préparer des améliorations.</small></div>
     <div class="usage-card">
       <div class="usage-title">Cette conversation <span id="usage-status">USD</span></div>
       <div class="amount" id="cost">0,000000 $</div>
@@ -37,7 +37,7 @@
         <div class="welcome-symbol" aria-hidden="true">✳</div>
         <div class="eyebrow">BONJOUR, MOI C’EST SIGI</div>
         <h2>On commence par quoi ?</h2>
-        <p class="intro">Écrire, clarifier une idée, travailler sur un fichier.<br>Pose ta question, on avance ensemble.</p>
+        <p class="intro">Discuter, explorer mon code, préparer une amélioration.<br>Ce chat est ton accès à l’agent SIGI.</p>
         <form id="connect-form" class="connect-card">
           <div class="connect-heading"><strong>Connecte ton modèle</strong><span>Une seule fois par session</span></div>
           <label for="api-key">Ta clé Gemini</label>
@@ -46,8 +46,8 @@
           <a href="https://aistudio.google.com/apikey" target="_blank" rel="noreferrer noopener">Créer ou retrouver ma clé ↗</a>
         </form>
         <div class="suggestions" id="suggestions">
-          <button type="button" data-prompt="Aide-moi à organiser mes idées pour un projet personnel."><span aria-hidden="true">✧</span><strong>Clarifier une idée</strong><small>Trouver par où commencer</small></button>
-          <button type="button" data-prompt="Aide-moi à rédiger un message clair et chaleureux."><span aria-hidden="true">↗</span><strong>Écrire ensemble</strong><small>Donner forme à un message</small></button>
+          <button type="button" data-prompt="Présente-toi en utilisant agent_info, puis lis CURRENT_STATE.md avec project_read. Distingue ce que tu sais faire maintenant de ce qui est prévu."><span aria-hidden="true">✧</span><strong>Découvrir SIGI</strong><small>Voir mes capacités réelles</small></button>
+          <button type="button" data-prompt="Explore ton projet avec project_tree, puis lis sigi/engine.py avec project_read. Explique-moi comment tu utilises tes outils en citant le code."><span aria-hidden="true">↗</span><strong>Explorer mon code</strong><small>Comprendre mon fonctionnement</small></button>
           <button type="button" data-prompt="Liste les fichiers disponibles dans mon espace de travail."><span aria-hidden="true">▤</span><strong>Voir mes fichiers</strong><small>Explorer le dossier essai</small></button>
         </div>
       </div>

@@ -11,6 +11,7 @@ from pathlib import Path
 from .engine import Engine
 from .contracts import UserFacingError
 from .models import ChatModel, DemoModel
+from .project import AgentTools
 from .store import JsonRunStore
 from .transport import RemoteWorkspace
 from .workspace import FileWorkspace
@@ -46,6 +47,7 @@ def main() -> int:
     live.add_argument("--workspace", type=Path)
     live.add_argument("--worker-url")
     live.add_argument("--state", type=Path, default=Path(".sigi"))
+    live.add_argument("--project", type=Path, help="Dossier des sources de SIGI (détecté automatiquement sinon)")
     live.add_argument("--ask-key", action="store_true", help="Demande la clé en saisie masquée pour cette commande")
     doctor = sub.add_parser("doctor", help="Vérifie la clé et l'accès au modèle, sans génération")
     doctor.add_argument("--config", type=Path, default=Path("config.example.toml"))
@@ -56,6 +58,7 @@ def main() -> int:
     ui.add_argument("--state", type=Path, default=Path(".sigi"))
     ui.add_argument("--port", type=int, default=8765)
     ui.add_argument("--demo", action="store_true", help="Interface de démonstration sans IA ni API")
+    ui.add_argument("--project", type=Path, help="Dossier des sources de SIGI (détecté automatiquement sinon)")
     inspect = sub.add_parser("inspect", help="Affiche un journal sauvegardé")
     inspect.add_argument("journal", type=Path)
     args = parser.parse_args()
@@ -69,7 +72,7 @@ def main() -> int:
             from .ui import serve
             config = tomllib.loads(args.config.read_text(encoding="utf-8"))
             try:
-                serve(args.port, config, args.workspace, args.state, args.demo)
+                serve(args.port, config, args.workspace, args.state, args.demo, args.project)
             except OSError:
                 raise ConfigurationError("Impossible d'ouvrir le serveur local. Essaie --port 8766.") from None
             return 0
@@ -106,6 +109,7 @@ def main() -> int:
             limits = config["limits"]
             workspace = (RemoteWorkspace(args.worker_url, os.environ.get("SIGI_WORKER_TOKEN", ""))
                          if args.worker_url else FileWorkspace(args.workspace))
+            workspace = AgentTools(workspace, args.project)
             result = Engine(model, workspace, store).run(args.task, str(limits["budget_usd"]),
                 limits["max_turns"], limits["max_output_tokens"])
         print(result.get("output", result.get("error", result["status"])))

@@ -2,6 +2,30 @@
 
 Premier parcours exécutable : modèle → outils fichiers → rapport → journal. Python 3.11 ou plus, sans dépendance à installer pour ce parcours.
 
+## Le chat est l'interface de l'agent
+
+SIGI reçoit désormais une identité technique fournie par le programme : sa version, le modèle utilisé, le dossier de ses propres sources et la liste des capacités réellement enregistrées. Il peut inspecter les fichiers de la v2 où il est installé, y compris ses modules, tests, interface et documentation. Le même catalogue d'outils est utilisé par la CLI et le chat ; ajouter un outil au registre ne demande pas de modifier le moteur.
+
+| Outil | Capacité active |
+|---|---|
+| `agent_info` | Décrire l'agent et ses limites réelles |
+| `project_tree` | Explorer ses sources et documents |
+| `project_read` | Lire le code, avec lignes et empreinte du fichier |
+| `project_search` | Rechercher un texte dans le projet |
+| `project_check_syntax` | Analyser la syntaxe Python sans exécution |
+| `project_propose_change` | Préparer une modification avec diff et contenu candidat |
+| `list_files`, `read_file`, `write_file` | Travailler dans le dossier `essai` |
+
+Les outils exécutés apparaissent sous la réponse dans le chat. Une modification proposée est enregistrée dans `essai/proposals/` avec l'empreinte de la version lue. Elle n'est pas appliquée au code actif et n'exécute pas de code généré. Les scripts, le Web, l'auto-déploiement et l'application automatique de ces propositions ne sont pas encore implémentés.
+
+Les dossiers de sessions, clés, fichiers cachés et dossiers de travail sont exclus de l'exploration des sources. Les sources sont détectées à partir de l'installation, pas du dossier `essai`. Si la distribution ne contient pas les sources, `--project /chemin/vers/sigi/v2` permet de préciser le dossier ; l'inventaire signale sinon leur absence.
+
+Exemples à demander à SIGI :
+
+- « Lis ton état actuel et ton code, puis explique tes capacités en citant les fichiers. »
+- « Cherche où sont gérés tes outils et explique le fonctionnement. »
+- « Propose une amélioration simple de ta documentation, sans l'appliquer. »
+
 **État : prototype alpha.** Le propriétaire a confirmé un premier échange réel avec Gemini, terminé avec un coût déclaré de 0,0001928 USD. La démo reste déterministe, sans IA, et les tests automatiques utilisent exclusivement des API simulées. Le worker HTTP a été testé sur loopback ; aucun serveur distant n'a été déployé.
 
 ## Discuter dans une interface simple
@@ -15,6 +39,8 @@ python3 -B -m sigi ui
 ```
 
 Ouvrir **http://127.0.0.1:8765** dans le navigateur Windows. Garder le terminal ouvert. Coller la clé Gemini dans le champ masqué, cliquer **Connecter**, puis écrire ses messages. La clé n'est demandée qu'une fois pendant la session et n'est pas sauvegardée sur disque. **Déconnecter** ou arrêter le serveur l'oublie ; une heure d'inactivité expire également la session.
+
+Après une mise à jour, arrêter l'ancien serveur avec **Ctrl+C**, récupérer les changements, relancer `python3 -B -m sigi ui`, puis actualiser la page et reconnecter la clé. Un serveur Python déjà lancé ne charge pas automatiquement les nouveaux outils.
 
 - Le modèle reçoit les messages précédents, pour une vraie conversation suivie.
 - Le budget SIGI configuré (0,05 USD par défaut) porte sur l'ensemble de cette conversation. Le coût affiché vient des tarifs configurés et de l'usage déclaré par l'API ; ce n'est pas le solde de crédits Google.
@@ -52,7 +78,7 @@ SIGI crée un brief, le lit, écrit `resultat.md` et sauvegarde un journal. Chaq
 python3 -B -m unittest discover -s tests -v
 ```
 
-Les vingt et un tests passent sous Ubuntu. Ils couvrent également l'historique, le budget cumulé, les sessions séparées, les requêtes d'origine étrangère et l'absence de clé dans les transcriptions. Les tests n'appellent aucune API externe.
+Les vingt-huit tests passent sous Ubuntu. Ils couvrent le contexte, le budget, les sessions et leurs clés, mais aussi le parcours complet d'inspection du projet et de préparation d'une modification depuis le chat. Les tests n'appellent aucune API externe.
 
 ## Diagnostiquer une erreur de connexion
 

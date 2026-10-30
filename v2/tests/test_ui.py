@@ -83,6 +83,8 @@ class UITests(unittest.TestCase):
         status, state = self.post("/api/connect", {"key": "FAKE-PRIVATE-KEY"})
         self.assertEqual(status, 200)
         self.assertTrue(state["connected"])
+        self.assertIn("project_read", {tool["name"] for tool in state["agent"]["tools"]})
+        self.assertEqual(len(state["agent"]["tools"]), 9)
         self.assertNotIn("FAKE-PRIVATE-KEY", json.dumps(state))
         self.assertEqual(self.post("/api/chat", {"message": "Je m'appelle Alice."})[0], 200)
         _, state = self.post("/api/chat", {"message": "Comment je m'appelle ?"})

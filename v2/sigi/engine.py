@@ -6,6 +6,7 @@ import uuid
 from decimal import Decimal
 
 from .contracts import Model, RunStore, UserFacingError, Workspace
+from . import __version__
 from .workspace import TOOL_SPECS
 
 PROMPT = """Tu es SIGI. Accomplis la mission avec les outils autorisés.
@@ -26,21 +27,28 @@ class Engine:
         if (not cap.is_finite() or cap < 0 or not spent.is_finite() or spent < 0
                 or not task.strip() or not 1 <= max_turns <= 30 or not 1 <= output_limit <= 8192):
             raise ValueError("Mission ou limites invalides.")
-        messages = copy.deepcopy(history) if history else [{"role": "system", "content": PROMPT}]
+        tools = getattr(self.workspace, "tool_specs", TOOL_SPECS)
+        context = getattr(self.workspace, "system_context", None)
+        system_prompt = PROMPT + ("\n\n" + context(self.model.name) if callable(context) else "")
+        messages = copy.deepcopy(history) if history else []
+        if messages and messages[0].get("role") == "system":
+            messages[0] = {"role": "system", "content": system_prompt}
+        else:
+            messages.insert(0, {"role": "system", "content": system_prompt})
         messages.append({"role": "user", "content": task})
-        run = {"id": str(uuid.uuid4()), "version": "0.2.0a1", "model": self.model.name,
+        run = {"id": str(uuid.uuid4()), "version": __version__, "model": self.model.name,
                "task": task, "status": "running", "spent_usd": str(spent), "reserved_usd": "0",
                "ceiling_usd": str(cap), "events": [], "messages": messages}
         self.store.save(run)
         try:
             for turn in range(max_turns):
-                reservation = self.model.reserve(run["messages"], TOOL_SPECS, output_limit)
+                reservation = self.model.reserve(run["messages"], tools, output_limit)
                 if spent + reservation > cap:
                     run["status"] = "budget_exhausted"
                     break
                 run["reserved_usd"] = str(reservation)
                 self.store.save(run)
-                reply = self.model.complete(run["messages"], TOOL_SPECS, output_limit)
+                reply = self.model.complete(run["messages"], tools, output_limit)
                 spent += self.model.cost(reply)
                 run["spent_usd"], run["reserved_usd"] = str(spent), "0"
                 run["events"].append({"type": "model", "turn": turn + 1,

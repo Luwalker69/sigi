@@ -12,14 +12,15 @@ from pathlib import Path
 from .chat import ChatSession, DemoChatModel
 from .contracts import UserFacingError
 from .models import ChatModel
+from .project import AgentTools
 from .store import JsonRunStore
 from .workspace import FileWorkspace
 
 STATIC = Path(__file__).with_name("static")
 
 
-def make_server(port, config, workspace, state, demo=False, model_factory=ChatModel):
-    workspace = FileWorkspace(workspace)
+def make_server(port, config, workspace, state, demo=False, model_factory=ChatModel, project_root=None):
+    workspace = AgentTools(FileWorkspace(workspace), project_root)
     runs, chats = JsonRunStore(state / "runs"), JsonRunStore(state / "chats")
     clients, clients_lock = {}, threading.Lock()
     csrf = secrets.token_urlsafe(32)
@@ -77,7 +78,7 @@ def make_server(port, config, workspace, state, demo=False, model_factory=ChatMo
             chat = client["chat"]
             value = chat.public_state() if chat else {"messages": [], "model": cfg["name"],
                 "spent_usd": "0", "reserved_usd": "0", "budget_usd": str(limits["budget_usd"])}
-            return {**value, "connected": chat is not None, "demo": demo}
+            return {**value, "connected": chat is not None, "demo": demo, "agent": workspace.info()}
 
         def do_GET(self):
             if not self.allowed_host():
@@ -159,9 +160,9 @@ def make_server(port, config, workspace, state, demo=False, model_factory=ChatMo
     return ThreadingHTTPServer(("127.0.0.1", port), Handler)
 
 
-def serve(port, config, workspace, state, demo=False):
+def serve(port, config, workspace, state, demo=False, project_root=None):
     workspace.mkdir(parents=True, exist_ok=True)
-    service = make_server(port, config, workspace, state, demo)
+    service = make_server(port, config, workspace, state, demo, project_root=project_root)
     print(f"SIGI est prêt : http://127.0.0.1:{service.server_port}", flush=True)
     print("Ouvre cette adresse dans ton navigateur. Ctrl+C pour arrêter et oublier les clés.", flush=True)
     if demo:
