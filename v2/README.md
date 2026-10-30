@@ -2,7 +2,33 @@
 
 Premier parcours exécutable : modèle → outils fichiers → rapport → journal. Python 3.11 ou plus, sans dépendance à installer pour ce parcours.
 
-**État : prototype alpha.** La démo est déterministe et n'utilise pas d'IA. L'adaptateur API existe mais aucun appel payant n'a été exécuté. Le worker HTTP a été testé sur loopback ; aucun serveur distant n'a été déployé.
+**État : prototype alpha.** Le propriétaire a confirmé un premier échange réel avec Gemini, terminé avec un coût déclaré de 0,0001928 USD. La démo reste déterministe, sans IA, et les tests automatiques utilisent exclusivement des API simulées. Le worker HTTP a été testé sur loopback ; aucun serveur distant n'a été déployé.
+
+## Discuter dans une interface simple
+
+Dans Ubuntu :
+
+```bash
+cd ~/ai/sigi/v2
+git pull --ff-only
+python3 -B -m sigi ui
+```
+
+Ouvrir **http://127.0.0.1:8765** dans le navigateur Windows. Garder le terminal ouvert. Coller la clé Gemini dans le champ masqué, cliquer **Connecter**, puis écrire ses messages. La clé n'est demandée qu'une fois pendant la session et n'est pas sauvegardée sur disque. **Déconnecter** ou arrêter le serveur l'oublie ; une heure d'inactivité expire également la session.
+
+- Le modèle reçoit les messages précédents, pour une vraie conversation suivie.
+- Le budget SIGI configuré (0,05 USD par défaut) porte sur l'ensemble de cette conversation. Le coût affiché vient des tarifs configurés et de l'usage déclaré par l'API ; ce n'est pas le solde de crédits Google.
+- **Nouvelle conversation** démarre un nouveau contexte et une nouvelle enveloppe. Il n'y a pas encore de plafond global partagé entre toutes les conversations : régler aussi les limites du projet chez le fournisseur.
+- Une actualisation conserve le chat tant que le serveur et sa session tournent. Les transcriptions sont enregistrées dans `.sigi/chats/`, mais leur restauration dans l'interface après arrêt du serveur reste à ajouter.
+- Les clés restent dans le pilote local ; cette interface est volontairement limitée à loopback. Elle n'est pas un serveur à exposer sur Internet.
+
+Pour essayer l'interface sans clé : `python3 -B -m sigi ui --demo`. Un bandeau indique clairement que les réponses de cette démonstration ne viennent pas d'une IA.
+
+## Charger quelques crédits Gemini
+
+La facturation se configure sur le projet Google de la clé, dans [Google AI Studio Billing](https://aistudio.google.com/billing). Google annonce un prépaiement minimum de 5 USD ou l'équivalent local ; le montant exact est affiché pendant le paiement. L'auto-recharge est optionnelle. Les délais de comptabilisation peuvent entraîner un dépassement du crédit ou du plafond choisi ; la limite n'est pas une coupure instantanée garantie. Le quota actuel peut suffire pour commencer.
+
+[Documentation officielle de facturation](https://ai.google.dev/gemini-api/docs/billing).
 
 ## Essayer dans Ubuntu
 
@@ -26,7 +52,7 @@ SIGI crée un brief, le lit, écrit `resultat.md` et sauvegarde un journal. Chaq
 python3 -B -m unittest discover -s tests -v
 ```
 
-Les quatorze tests passent sous Ubuntu. Les tests n'appellent aucune API externe.
+Les vingt et un tests passent sous Ubuntu. Ils couvrent également l'historique, le budget cumulé, les sessions séparées, les requêtes d'origine étrangère et l'absence de clé dans les transcriptions. Les tests n'appellent aucune API externe.
 
 ## Diagnostiquer une erreur de connexion
 

@@ -1,6 +1,7 @@
 """Premier moteur interchangeable ; aucune dépendance fournisseur."""
 
 import json
+import copy
 import uuid
 from decimal import Decimal
 
@@ -18,16 +19,19 @@ class Engine:
     def __init__(self, model: Model, workspace: Workspace, store: RunStore):
         self.model, self.workspace, self.store = model, workspace, store
 
-    def run(self, task: str, ceiling: str = "0.05", max_turns: int = 8, output_limit: int = 1024) -> dict:
+    def run(self, task: str, ceiling: str = "0.05", max_turns: int = 8, output_limit: int = 1024,
+            history: list[dict] | None = None, previous_spent: str = "0") -> dict:
         cap = Decimal(ceiling)
-        if not cap.is_finite() or cap < 0 or not task.strip() or not 1 <= max_turns <= 30 or not 1 <= output_limit <= 8192:
+        spent = Decimal(previous_spent)
+        if (not cap.is_finite() or cap < 0 or not spent.is_finite() or spent < 0
+                or not task.strip() or not 1 <= max_turns <= 30 or not 1 <= output_limit <= 8192):
             raise ValueError("Mission ou limites invalides.")
+        messages = copy.deepcopy(history) if history else [{"role": "system", "content": PROMPT}]
+        messages.append({"role": "user", "content": task})
         run = {"id": str(uuid.uuid4()), "version": "0.2.0a1", "model": self.model.name,
-               "task": task, "status": "running", "spent_usd": "0", "reserved_usd": "0",
-               "ceiling_usd": str(cap), "events": [], "messages": [
-                   {"role": "system", "content": PROMPT}, {"role": "user", "content": task}]}
+               "task": task, "status": "running", "spent_usd": str(spent), "reserved_usd": "0",
+               "ceiling_usd": str(cap), "events": [], "messages": messages}
         self.store.save(run)
-        spent = Decimal(0)
         try:
             for turn in range(max_turns):
                 reservation = self.model.reserve(run["messages"], TOOL_SPECS, output_limit)

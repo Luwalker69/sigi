@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="sigi-csrf" content="__CSRF__">
+  <title>SIGI — ton espace de conversation</title>
+  <link rel="stylesheet" href="/styles.css">
+  <script src="/app.js" defer></script>
+</head>
+<body>
+  <aside class="sidebar">
+    <a class="brand" href="/" aria-label="SIGI, accueil"><span class="mark">s.</span><span>SIGI<small>Ton espace pour avancer</small></span></a>
+    <button id="new-chat" class="new-chat" type="button" disabled><span aria-hidden="true">＋</span> Nouvelle conversation</button>
+    <div class="nav-label">TON ESPACE</div>
+    <div class="active-nav"><span aria-hidden="true">◌</span> Conversation</div>
+    <div class="sidebar-note"><span class="note-icon" aria-hidden="true">↗</span><p>Une idée, un texte,<br>un petit coup de main.</p><small>SIGI peut aussi lire et créer<br>des fichiers dans le dossier essai.</small></div>
+    <div class="usage-card">
+      <div class="usage-title">Cette conversation <span id="usage-status">USD</span></div>
+      <div class="amount" id="cost">0,000000 $</div>
+      <div class="meter"><div id="budget-fill"></div></div>
+      <p id="budget-label">Budget SIGI : —</p>
+      <small>Coût estimé des échanges.<br>Le solde Google est séparé.</small>
+      <a href="https://aistudio.google.com/billing" target="_blank" rel="noreferrer noopener">Mes crédits Google <span aria-hidden="true">↗</span></a>
+    </div>
+    <div class="local-note"><span class="dot"></span> Interface sur cet ordinateur</div>
+  </aside>
+  <main>
+    <header class="topbar">
+      <div><span class="eyebrow">CONVERSATION</span><h1>Un peu d’élan pour tes idées.</h1></div>
+      <div class="connection"><span class="dot" id="connection-dot"></span><span id="connection-label">Chargement…</span><button id="disconnect" type="button" hidden>Déconnecter</button></div>
+    </header>
+    <div id="demo-banner" class="demo-banner" hidden>Mode démonstration — aucune réponse IA, aucun appel externe.</div>
+    <div class="mobile-tools"><span id="mobile-cost">Coût : 0 $</span><button id="new-chat-mobile" type="button" disabled>＋ Nouvelle conversation</button></div>
+    <section class="conversation" aria-label="Conversation avec SIGI">
+      <div class="welcome" id="welcome">
+        <div class="welcome-symbol" aria-hidden="true">✳</div>
+        <div class="eyebrow">BONJOUR, MOI C’EST SIGI</div>
+        <h2>On commence par quoi ?</h2>
+        <p class="intro">Écrire, clarifier une idée, travailler sur un fichier.<br>Pose ta question, on avance ensemble.</p>
+        <form id="connect-form" class="connect-card">
+          <div class="connect-heading"><strong>Connecte ton modèle</strong><span>Une seule fois par session</span></div>
+          <label for="api-key">Ta clé Gemini</label>
+          <div class="key-row"><input id="api-key" type="password" autocomplete="off" spellcheck="false" placeholder="Colle ta clé ici" required aria-describedby="key-note"><button type="submit" id="connect-button" disabled>Connecter <span aria-hidden="true">→</span></button></div>
+          <small id="key-note">La clé reste en mémoire pendant cette session. Elle n’est pas enregistrée dans les fichiers.</small>
+          <a href="https://aistudio.google.com/apikey" target="_blank" rel="noreferrer noopener">Créer ou retrouver ma clé ↗</a>
+        </form>
+        <div class="suggestions" id="suggestions">
+          <button type="button" data-prompt="Aide-moi à organiser mes idées pour un projet personnel."><span aria-hidden="true">✧</span><strong>Clarifier une idée</strong><small>Trouver par où commencer</small></button>
+          <button type="button" data-prompt="Aide-moi à rédiger un message clair et chaleureux."><span aria-hidden="true">↗</span><strong>Écrire ensemble</strong><small>Donner forme à un message</small></button>
+          <button type="button" data-prompt="Liste les fichiers disponibles dans mon espace de travail."><span aria-hidden="true">▤</span><strong>Voir mes fichiers</strong><small>Explorer le dossier essai</small></button>
+        </div>
+      </div>
+      <div id="messages" class="messages" role="log" aria-live="polite" aria-relevant="additions"></div>
+      <div id="thinking" class="thinking" role="status" hidden><span class="mini-mark">s.</span><span>SIGI réfléchit<span class="ellipsis">…</span></span></div>
+    </section>
+    <div class="composer-area">
+      <div id="notice" class="notice" role="alert" hidden></div>
+      <form id="chat-form" class="composer">
+        <label class="sr-only" for="message">Ton message à SIGI</label>
+        <textarea id="message" placeholder="Écris ton message à SIGI…" rows="1" maxlength="20000" disabled></textarea>
+        <div class="composer-bottom"><span id="model-label">Connecte ta clé pour commencer</span><button id="send" type="submit" disabled aria-label="Envoyer le message">↑</button></div>
+      </form>
+      <p class="composer-note">Entrée pour envoyer · Maj + Entrée pour une nouvelle ligne · SIGI peut se tromper.</p>
+    </div>
+  </main>
+</body>
+</html>

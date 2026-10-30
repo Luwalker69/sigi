@@ -50,12 +50,28 @@ def main() -> int:
     doctor = sub.add_parser("doctor", help="Vérifie la clé et l'accès au modèle, sans génération")
     doctor.add_argument("--config", type=Path, default=Path("config.example.toml"))
     doctor.add_argument("--ask-key", action="store_true", help="Demande une clé sans utiliser celle du terminal")
+    ui = sub.add_parser("ui", help="Ouvre un chat dans le navigateur, sur cet ordinateur")
+    ui.add_argument("--config", type=Path, default=Path("config.example.toml"))
+    ui.add_argument("--workspace", type=Path, default=Path("essai"))
+    ui.add_argument("--state", type=Path, default=Path(".sigi"))
+    ui.add_argument("--port", type=int, default=8765)
+    ui.add_argument("--demo", action="store_true", help="Interface de démonstration sans IA ni API")
     inspect = sub.add_parser("inspect", help="Affiche un journal sauvegardé")
     inspect.add_argument("journal", type=Path)
     args = parser.parse_args()
     try:
         if args.command == "inspect":
             print(args.journal.read_text(encoding="utf-8"))
+            return 0
+        if args.command == "ui":
+            if not args.config.is_file():
+                raise ConfigurationError("Configuration introuvable : se placer dans ~/ai/sigi/v2.")
+            from .ui import serve
+            config = tomllib.loads(args.config.read_text(encoding="utf-8"))
+            try:
+                serve(args.port, config, args.workspace, args.state, args.demo)
+            except OSError:
+                raise ConfigurationError("Impossible d'ouvrir le serveur local. Essaie --port 8766.") from None
             return 0
         if args.command in {"run", "doctor"}:
             if not args.config.is_file():

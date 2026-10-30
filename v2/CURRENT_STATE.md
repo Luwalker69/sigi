@@ -14,20 +14,23 @@ Assistant aussi polyvalent que possible : automatisations natives, recherche app
 - Un appel API compatible Chat Completions a été vérifié contre un serveur simulé, y compris la remontée du coût et l'absence de clé dans le journal.
 - Les limites de budget, chemins hors workspace, liens symboliques et écrasements sont testés.
 - Les redirections HTTP ne transmettent pas les identifiants.
-- Quatorze tests sur quatorze passent sous Ubuntu, dont les diagnostics HTTP/TLS/DNS et la saisie masquée. Le correctif de diagnostic n'a pas encore été testé sous Windows.
+- Vingt et un tests sur vingt et un passent sous Ubuntu, dont les diagnostics, le contexte de conversation, le budget cumulé et les frontières HTTP locales. Le correctif de diagnostic et l'interface n'ont pas encore été testés sous Windows natif.
 - La CLI `python3 -B -m sigi demo` a été exécutée dans Ubuntu et a produit un rapport réel.
 - `doctor --ask-key` vérifie l'authentification et la liste des modèles sans génération. Son transport est vérifié avec une API simulée.
 - `run --ask-key` demande directement la clé, sans `read` ni `export`, et remplace une valeur de terminal obsolète pour cette seule commande.
+- Le propriétaire a confirmé un premier appel Gemini réussi : présentation de SIGI, statut `completed`, coût déclaré 0,0001928 USD. Cette observation valide un échange simple ; elle ne mesure pas la qualité générale du modèle.
+- `python3 -B -m sigi ui` lance une interface locale sur http://127.0.0.1:8765 : clé masquée en mémoire, conversation suivie, coût cumulé, nouvelle conversation et déconnexion.
+- Le parcours de chat en mode démo a été exercé dans un navigateur, sur une vue étroite et une vue d'ordinateur ; la connexion et la déconnexion sont également testées via une API simulée.
 
-## Incident en cours
+## Incident résolu et limites connues
 
-Le premier essai réel du propriétaire a échoué avec un `RuntimeError` dont la cause était masquée par le moteur. La cause réelle n'est pas encore identifiée : elle demande le diagnostic authentifié côté propriétaire. Aucune clé du propriétaire n'a été utilisée pendant les tests et aucun changement de facturation n'a été effectué.
+Le premier essai réel avait échoué avec un `RuntimeError` masqué. Après ajout de `doctor`, le propriétaire a confirmé l'authentification puis une génération réussie. La cause de l'ancien échec n'a pas été établie. Aucune clé du propriétaire n'a été utilisée pendant les tests automatiques et aucun changement de facturation n'a été effectué par l'assistant.
 
 Le correctif préserve les codes HTTP et quelques raisons connues sans afficher le corps brut, la clé ou des extraits de requête. Le quota de génération n'est pas prouvé par une simple liste de modèles.
 
 ## Ce qui n'est pas encore fait
 
-- Premier appel d'un vrai modèle avec une clé du propriétaire ; qualité et compatibilité à confirmer.
+- Conversation multi-tour et actions fichiers de l'interface à confirmer avec le vrai modèle ; tests automatiques faits avec un modèle simulé.
 - Hébergement distant, terminaison TLS, confinement OS et exécution de code généré.
 - Navigation, moteur de recherche, documents et comptes connectés.
 - Automatisations programmées, reprise automatique après crash et budgets multi-workers.
@@ -39,9 +42,11 @@ Le correctif préserve les codes HTTP et quelques raisons connues sans afficher 
 
 Le journal est conservé, mais la mission ne redémarre pas automatiquement. En cas d'appel interrompu, la réservation demeure ; une action marquée `pending` doit être réconciliée avant un rejeu. Le worker n'exécute aucun code arbitraire. Les protections de chemin ne remplacent pas une sandbox OS, notamment si un autre processus peut changer les fichiers en parallèle.
 
+Le chat conserve les réservations incertaines dans son budget pour ne pas les effacer au message suivant. Les clés ne sont pas persistées ; les transcriptions restent locales sous `.sigi/chats/`. Les conversations ne sont pas encore restaurées dans l'interface après redémarrage. Chaque nouvelle conversation reçoit une enveloppe propre ; aucun plafond global multi-session n'est encore appliqué.
+
 ## Prochaine étape unique
 
-Faire une première mission réelle avec une seule API : lire un brief, créer une synthèse, contrôler le fichier et rapprocher le coût du journal de celui du fournisseur. Ajuster ensuite l'adaptateur et les limites sur ces observations.
+Utiliser l'interface sur deux ou trois échanges réels, puis demander de lire un brief et de créer une synthèse. Vérifier le fichier et rapprocher le coût cumulé de celui du fournisseur. Le paiement des crédits reste réalisé par le propriétaire dans Google AI Studio.
 
 ## Puis
 
