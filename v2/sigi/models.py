@@ -4,16 +4,18 @@ import json
 from decimal import Decimal
 
 from .contracts import Reply
-from .transport import post_json, validate_endpoint
+from .transport import post_json, request_json, validate_endpoint
 
 
 class ChatModel:
     def __init__(self, endpoint: str, key: str, name: str, input_rate: str, output_rate: str):
         validate_endpoint(endpoint)
-        self.endpoint, self.key, self.name = endpoint.rstrip("/"), key, name
+        self.endpoint, self.key, self.name = endpoint.rstrip("/"), key.strip(), name
         self.input_rate, self.output_rate = Decimal(input_rate), Decimal(output_rate)
-        if not key or not name:
+        if not self.key or not name:
             raise ValueError("Clé API et modèle nécessaires.")
+        if any(character.isspace() for character in self.key) or not self.key.isascii():
+            raise ValueError("La clé doit être saisie seule, sans espaces ni retours à la ligne.")
         if any(not rate.is_finite() or rate <= 0 for rate in (self.input_rate, self.output_rate)):
             raise ValueError("Tarifs positifs et finis requis.")
 
@@ -24,6 +26,16 @@ class ChatModel:
 
     def cost(self, reply):
         return (reply.input_tokens * self.input_rate + reply.output_tokens * self.output_rate) / Decimal(1_000_000)
+
+    def available_models(self) -> tuple[bool, bool]:
+        """Vérifie les métadonnées, sans lancer de génération ni changer de modèle."""
+        result = request_json(self.endpoint + "/models", self.key)
+        rows = result.get("data")
+        if not isinstance(rows, list):
+            raise ValueError("Liste de modèles inattendue.")
+        ids = {row["id"].removeprefix("models/") for row in rows
+               if isinstance(row, dict) and isinstance(row.get("id"), str)}
+        return self.name in ids, bool(result.get("has_more"))
 
     def complete(self, messages, tools, limit):
         result = post_json(self.endpoint + "/chat/completions", self.key, {

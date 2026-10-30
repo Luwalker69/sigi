@@ -14,8 +14,16 @@ Assistant aussi polyvalent que possible : automatisations natives, recherche app
 - Un appel API compatible Chat Completions a été vérifié contre un serveur simulé, y compris la remontée du coût et l'absence de clé dans le journal.
 - Les limites de budget, chemins hors workspace, liens symboliques et écrasements sont testés.
 - Les redirections HTTP ne transmettent pas les identifiants.
-- Neuf tests sur neuf passent sous Ubuntu ; huit passent et un est ignoré sous Windows.
+- Quatorze tests sur quatorze passent sous Ubuntu, dont les diagnostics HTTP/TLS/DNS et la saisie masquée. Le correctif de diagnostic n'a pas encore été testé sous Windows.
 - La CLI `python3 -B -m sigi demo` a été exécutée dans Ubuntu et a produit un rapport réel.
+- `doctor --ask-key` vérifie l'authentification et la liste des modèles sans génération. Son transport est vérifié avec une API simulée.
+- `run --ask-key` demande directement la clé, sans `read` ni `export`, et remplace une valeur de terminal obsolète pour cette seule commande.
+
+## Incident en cours
+
+Le premier essai réel du propriétaire a échoué avec un `RuntimeError` dont la cause était masquée par le moteur. La cause réelle n'est pas encore identifiée : elle demande le diagnostic authentifié côté propriétaire. Aucune clé du propriétaire n'a été utilisée pendant les tests et aucun changement de facturation n'a été effectué.
+
+Le correctif préserve les codes HTTP et quelques raisons connues sans afficher le corps brut, la clé ou des extraits de requête. Le quota de génération n'est pas prouvé par une simple liste de modèles.
 
 ## Ce qui n'est pas encore fait
 

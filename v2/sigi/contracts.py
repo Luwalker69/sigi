@@ -5,6 +5,12 @@ from decimal import Decimal
 from typing import Protocol
 
 
+class UserFacingError(RuntimeError):
+    """Erreur dont le texte a été construit pour être affichable sans secret."""
+
+    public_message: str
+
+
 @dataclass(frozen=True)
 class Reply:
     message: dict

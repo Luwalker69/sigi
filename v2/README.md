@@ -26,7 +26,30 @@ SIGI crée un brief, le lit, écrit `resultat.md` et sauvegarde un journal. Chaq
 python3 -B -m unittest discover -s tests -v
 ```
 
-Les neuf tests passent sous Ubuntu. Sous Windows : huit passent, un est ignoré lorsque les liens symboliques ne sont pas disponibles. Les tests n'appellent aucune API externe.
+Les quatorze tests passent sous Ubuntu. Les tests n'appellent aucune API externe.
+
+## Diagnostiquer une erreur de connexion
+
+Depuis ce dossier, lancer :
+
+```bash
+python3 -B -m sigi doctor --ask-key
+```
+
+Coller uniquement la clé quand Python la demande, puis appuyer sur Entrée. La saisie est masquée ; la clé n'est ni affichée ni enregistrée. Cette option remplace, pour cette seule commande, une éventuelle ancienne valeur dans le terminal. Il n'est pas nécessaire de taper `read` ou `export`.
+
+`doctor` consulte seulement la liste des modèles : aucune génération n'est lancée. Une connexion acceptée ne garantit pas un quota de génération disponible. Si le modèle n'apparaît pas, aucun modèle ni tarif n'est changé automatiquement.
+
+Les erreurs affichent désormais le statut HTTP et une explication construite sans corps de réponse brut : clé invalide, accès refusé, crédits requis, quota, modèle introuvable, certificats TLS, DNS ou connexion. Une réponse inconnue reste masquée. Ne pas désactiver la validation TLS pour contourner une erreur de certificat.
+
+Après un diagnostic réussi, lancer une mission avec une saisie directe de la clé :
+
+```bash
+mkdir -p essai
+python3 -B -m sigi run 'Bonjour, présente-toi brièvement.' --workspace essai --ask-key
+```
+
+Le dossier s'appelle `essai`. Une erreur de dossier est signalée avant de demander la clé. Les commandes suivantes qui utilisent `--ask-key` redemandent la clé ; cette version ne la sauvegarde pas sur le disque.
 
 ## Première mission avec une API
 

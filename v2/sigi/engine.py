@@ -4,7 +4,7 @@ import json
 import uuid
 from decimal import Decimal
 
-from .contracts import Model, RunStore, Workspace
+from .contracts import Model, RunStore, UserFacingError, Workspace
 from .workspace import TOOL_SPECS
 
 PROMPT = """Tu es SIGI. Accomplis la mission avec les outils autorisés.
@@ -73,6 +73,9 @@ class Engine:
                     self.store.save(run)
             else:
                 run["status"] = "turns_exhausted"
+        except UserFacingError as error:
+            run["status"] = "failed"
+            run["error"] = error.public_message
         except Exception as error:
             run["status"] = "failed"
             run["error"] = type(error).__name__ + " : mission arrêtée ; aucun nouvel essai automatique."
